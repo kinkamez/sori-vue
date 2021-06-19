@@ -1,0 +1,3 @@
+electron-packager . Soriprogi  --platform=linux  --arch=x64
+npm run  electron:build --linux
+npm run electron:serve
