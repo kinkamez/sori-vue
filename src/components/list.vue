@@ -367,7 +367,7 @@ export default {
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
       this.store.state.data2 = this.store.state.data.filter(
         (e) => e.archiv === this.store.state.mindenekelott
-      );
+      ).sort((a, b) => a.nev.localeCompare(b.nev));
 
       return this.store.state.data2;
       // console.log( this.store.state.data, "kecske");
