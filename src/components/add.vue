@@ -1,3 +1,4 @@
+// electorn vagy nem ?
 <template>
   <nav class="navbar fixed-top navbar-expand-sm navbar-light bg-light">
     <div class="container-fluid">
