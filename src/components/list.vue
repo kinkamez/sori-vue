@@ -308,7 +308,7 @@ export default {
       } //sorozatbarat url kezelo
 
       // window.open(linke, "_blank");
-      window.open(linke);
+      open(linke);
     }
 
     const modosito = function (i, kulcs) {
