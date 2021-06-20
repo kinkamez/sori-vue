@@ -18,6 +18,8 @@
               v-bind:class="{
                 'border-warning border-top-0 border-start-0 border-end-0 border-4':
                   url_checker(message.ut),
+                'border-success border-top-0 border-start-0 border-end-0 border-4':
+                  urese(message.ut),
               }"
             >
               <img
@@ -58,7 +60,11 @@
                   >
                 </div>
                 <div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-outline-warning">
+                  <button
+                    type="button"
+                    @click="videokereso(message.ut, message.evad, message.resz)"
+                    class="btn btn-sm btn-outline-warning"
+                  >
                     <i class="far fa-question-circle"></i>
                   </button>
                   <button
@@ -78,7 +84,8 @@
                         message.ut,
                         parseInt(message.evad),
                         parseInt(message.mas),
-                        parseInt(message.evadperresz)
+                        parseInt(message.evadperresz),
+                        message.ut
                       )
                     "
                   >
@@ -96,22 +103,19 @@
 
 <script>
 import { onMounted, inject, onUpdated, onUnmounted } from "vue";
-// import { reactive, onMounted, ref } from "vue";
 import db from "../db.js";
-// import { valami } from "../api.vue";
 import axios from "axios";
-
-// import open from "open";
+import readdirp from "readdirp";
+import open from "open";
 
 export default {
   setup() {
     const store = inject("store");
     let objBe, frissS, frissE;
-    const novelo = function (kulcs, aktualis, urli, evad, id, evadperresz) {
-      // aktualizacio(evad, id, kulcs, parseInt(aktualis + 2));
+    const novelo = function (kulcs, aktualis, urli, evad, id, evadperresz, ut) {
       if (evadperresz === aktualis + 1) {
         objBe = { Episode: 0, Season: evad + 1 };
-        frissS = evad + 1 ;
+        frissS = evad + 1;
         frissE = 1;
       } else {
         objBe = { Episode: aktualis + 1 };
@@ -119,7 +123,7 @@ export default {
         frissE = aktualis + 2;
       }
       aktualizacio(frissS, id, kulcs, frissE);
-
+      videokereso(ut, evad, aktualis + 1);
       db.database()
         .ref("data/" + kulcs)
         .update(objBe, (error) => {
@@ -135,6 +139,14 @@ export default {
         webnezo(urli, evad, aktualis);
 
         // window.open(urli, '_blank').focus();
+      }
+    };
+
+    const urese = function (message) {
+      if (message === undefined || message === null || message === "") {
+        return false;
+      } else {
+        return true;
       }
     };
     /* eslint-disable no-unused-vars */
@@ -214,6 +226,31 @@ export default {
           // react on errors.
         });
     };
+    const videokereso = function (mappas, evad, resz) {
+      let csomag = [];
+      // const mappas1 = "/run/media/kinka/Data/sorozatok/blindspot/";
+      // console.log( mappas);
+      readdirp(mappas, {
+        fileFilter: ["*.mkv", "*.avi", "*.mp4"],
+        alwaysStat: false,
+      }).on("data", (entry) => {
+        const fullPath = entry.fullPath;
+        // const filename = entry.basename;
+
+        const minta = "[.][Ss]?0?" + evad + "[XeEe]?0?(" + resz + ")[.]";
+        // const	 minta = /[Ss]?0?${1}[XeEe]?0?(${1})\D/g;
+
+        var patt = new RegExp(minta);
+        var res = patt.exec(fullPath);
+        if (res && fullPath.toLowerCase().indexOf("sample") === -1) {
+          csomag.push(fullPath);
+
+          open(csomag[0]);
+          // console.log( mappas,csomag[0]);
+        }
+      });
+    };
+
     /* eslint-disable no-unused-vars */
     function extractHostname(url) {
       var hostname;
@@ -270,7 +307,8 @@ export default {
         }
       } //sorozatbarat url kezelo
 
-      window.open(linke, "_blank");
+      // window.open(linke, "_blank");
+      window.open(linke);
     }
 
     const modosito = function (i, kulcs) {
@@ -327,7 +365,7 @@ export default {
             }
           });
           // state.messages = messages;
-          // console.log(" betoltve");
+          console.log(store.state.data);
         });
     };
 
@@ -360,14 +398,16 @@ export default {
       store,
       modosito,
       url_checker,
+      videokereso,
+      urese,
     };
   },
   computed: {
     arrayfilter() {
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-      this.store.state.data2 = this.store.state.data.filter(
-        (e) => e.archiv === this.store.state.mindenekelott
-      ).sort((a, b) => a.nev.localeCompare(b.nev));
+      this.store.state.data2 = this.store.state.data
+        .filter((e) => e.archiv === this.store.state.mindenekelott)
+        .sort((a, b) => a.nev.localeCompare(b.nev));
 
       return this.store.state.data2;
       // console.log( this.store.state.data, "kecske");
