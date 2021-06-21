@@ -419,11 +419,17 @@ export default {
 .card-img-overlay {
   opacity: 0;
   background-color: black;
+  transition: opacity 0.6s ease-in-out;
+  
+  
 }
 
 .card-img-overlay:hover {
   opacity: 0.9;
+ transition: opacity 0.6s ease-in-out;
+ 
 }
+
 
 .maximg {
   max-height: 280px;
