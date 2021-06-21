@@ -24,7 +24,7 @@
                 v-if="message.kep !== undefined"
                 v-bind:src="message.kep"
                 v-bind:alt="message.nev"
-                style="object-fit: cover"
+               
                 data-toggle="tooltip"
                 class="card-img maximg"
               />
@@ -49,8 +49,9 @@
                 <div
                   class="text-center align-items-center bg-dark rounded mb-1"
                   style="margin-top: auto"
+                  v-bind:title=" message.stat"
                 >
-                  <small class="text-white bg-dark">
+                  <small class="text-white bg-dark" v-bind:title='"S" +message.nseas + "/E" + message.nepis '>
                     S{{ message.evad }} &nbsp; E{{ message.resz }}/{{
                       message.evadperresz
                     }}
@@ -111,7 +112,7 @@ export default {
       // aktualizacio(evad, id, kulcs, parseInt(aktualis + 2));
       if (evadperresz === aktualis + 1) {
         objBe = { Episode: 0, Season: evad + 1 };
-        frissS = evad + 1 ;
+        frissS = evad + 1;
         frissE = 1;
       } else {
         objBe = { Episode: aktualis + 1 };
@@ -180,7 +181,15 @@ export default {
           axios.spread((...responses) => {
             const responseOne = responses[0];
             const responseTwo = responses[1];
+           
+            const gyartasban = responseOne.data.in_production;
+            const lastepisode =
+              responseOne.data.last_episode_to_air.episode_number;
+            const lastseason =
+              responseOne.data.last_episode_to_air.season_number;
+            const status = responseOne.data.status;
 
+            //responseOne.data.next_episode_to_air
             const alap_keres = responseOne.data.seasons.filter(function (
               season
             ) {
@@ -201,6 +210,10 @@ export default {
                   Pic: season_poster,
                   Episodeyear: episode_count,
                   Next_episode: next_episodeAir,
+                  Status: status,
+                  Lastepisode: lastepisode,
+                  Lastseason: lastseason,
+                  Inproduction: gyartasban,
                 },
                 (error) => {
                   if (error) {
@@ -323,6 +336,9 @@ export default {
                 evadperresz: data[key].Episodeyear,
                 kep: data[key].Pic,
                 kovetkezo: data[key].Next_episode,
+                stat: data[key].Status,
+                nepis: data[key].Lastepisode,
+                nseas: data[key].Lastseason,
               });
             }
           });
@@ -365,9 +381,9 @@ export default {
   computed: {
     arrayfilter() {
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-      this.store.state.data2 = this.store.state.data.filter(
-        (e) => e.archiv === this.store.state.mindenekelott
-      ).sort((a, b) => a.nev.localeCompare(b.nev));
+      this.store.state.data2 = this.store.state.data
+        .filter((e) => e.archiv === this.store.state.mindenekelott)
+        .sort((a, b) => a.nev.localeCompare(b.nev));
 
       return this.store.state.data2;
       // console.log( this.store.state.data, "kecske");
@@ -380,16 +396,12 @@ export default {
   opacity: 0;
   background-color: black;
   transition: opacity 0.6s ease-in-out;
-  
-  
 }
 
 .card-img-overlay:hover {
   opacity: 0.9;
- transition: opacity 0.6s ease-in-out;
- 
+  transition: opacity 0.6s ease-in-out;
 }
-
 
 .maximg {
   max-height: 280px;
