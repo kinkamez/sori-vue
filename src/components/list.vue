@@ -250,7 +250,8 @@ export default {
         const fullPath = entry.fullPath;
         // const filename = entry.basename;
 
-        const minta = "[.][Ss]?0?" + evad + "[XeEe]?0?(" + resz + ")[.]";
+        // eslint-disable-next-line no-useless-escape
+        const minta = "\.[Ss]?0?" + evad + "[XxEe]?0?(" + resz + ")\.";
         // const	 minta = /[Ss]?0?${1}[XeEe]?0?(${1})\D/g;
 
         var patt = new RegExp(minta);
