@@ -24,7 +24,6 @@
                 v-if="message.kep !== undefined"
                 v-bind:src="message.kep"
                 v-bind:alt="message.nev"
-               
                 data-toggle="tooltip"
                 class="card-img maximg"
               />
@@ -49,9 +48,12 @@
                 <div
                   class="text-center align-items-center bg-dark rounded mb-1"
                   style="margin-top: auto"
-                  v-bind:title=" message.stat"
+                  v-bind:title="message.stat"
                 >
-                  <small class="text-white bg-dark" v-bind:title='"S" +message.nseas + "/E" + message.nepis '>
+                  <small
+                    class="text-white bg-dark"
+                    v-bind:title="'S' + message.nseas + '/E' + message.nepis"
+                  >
                     S{{ message.evad }} &nbsp; E{{ message.resz }}/{{
                       message.evadperresz
                     }}
@@ -96,19 +98,16 @@
 </template>
 
 <script>
-import { onMounted, inject, onUpdated, onUnmounted } from "vue";
-// import { reactive, onMounted, ref } from "vue";
+import { onMounted, inject } from "vue";
 import db from "../db.js";
-// import { valami } from "../api.vue";
 import axios from "axios";
-
-// import open from "open";
 
 export default {
   setup() {
     const store = inject("store");
-    let objBe, frissS, frissE;
+
     const novelo = function (kulcs, aktualis, urli, evad, id, evadperresz) {
+      let objBe, frissS, frissE;
       // aktualizacio(evad, id, kulcs, parseInt(aktualis + 2));
       if (evadperresz === aktualis + 1) {
         objBe = { Episode: 0, Season: evad + 1 };
@@ -132,30 +131,13 @@ export default {
           }
         });
 
-      if (url_checker(urli)) {
+      if (url_checker(urli) && store.state.beallitasok.megnyit) {
         webnezo(urli, evad, aktualis);
 
         // window.open(urli, '_blank').focus();
       }
     };
     /* eslint-disable no-unused-vars */
-    // const adatkereso = function () {
-    //   // https://api.themoviedb.org/3/search/tv?api_key=yes&language=en-US&page=1&query=kifejezes&include_adult=false
-    //   axios
-    //     .get(
-    //       "https://api.themoviedb.org/3/search/tv?api_key=1bdbd5a458166aa9a6bdb992815c0771&language=hu-HU&page=1&query= " +
-    //         store.state.sorozat_nev +
-    //         "&include_adult=false"
-    //     )
-    //     .then((response) => {
-    //       const alap_keres = response.results[0];
-
-    //      store.state.sorozat_tvdb = alap_keres.id;
-    //      store.state.sorozat_kep =
-    //         "https://image.tmdb.org/t/p/w300/" + alap_keres.poster_path;
-    //     })
-    //     .catch((error) => console.log(error));
-    // };
 
     const aktualizacio = function (evad, id, kulcs, resz) {
       let novelt_resz = resz;
@@ -181,7 +163,7 @@ export default {
           axios.spread((...responses) => {
             const responseOne = responses[0];
             const responseTwo = responses[1];
-           
+
             const gyartasban = responseOne.data.in_production;
             const lastepisode =
               responseOne.data.last_episode_to_air.episode_number;
@@ -321,10 +303,7 @@ export default {
           // let mutasd_melyiket = 1;
           store.state.data = [];
           Object.keys(data).forEach((key) => {
-            // if (data[key].Archive === store.state.mindenekelott) {
             if (data[key].Archive) {
-              // populal(data[key].Name, key);
-
               store.state.data.push({
                 id: key,
                 nev: data[key].Name,
@@ -342,35 +321,14 @@ export default {
               });
             }
           });
-          // state.messages = messages;
-          // console.log(" betoltve");
+          
         });
     };
 
     onMounted(() => {
-      console.log("mounted");
       betolto(store.state.mindenekelott);
-
-      // let api_url =
-      //   "https://api.themoviedb.org/3/tv/1408?api_key=1bdbd5a458166aa9a6bdb992815c0771";
-      // const valami = async function () {
-      //   axios
-      //     .get(api_url)
-      //     .then((response) => {
-      //       console.log(response);
-      //     })
-      //     .catch((error) => console.log(error));
-      // };
-      // valami();
     });
 
-    onUpdated(() => {
-      //  betolto(store.state.mindenekelott);
-      console.log("updated!");
-    });
-    onUnmounted(() => {
-      console.log("unmounted!");
-    });
     return {
       novelo,
       store,

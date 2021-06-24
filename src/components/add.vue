@@ -1,43 +1,4 @@
 <template>
-  <nav class="navbar fixed-top navbar-expand-sm navbar-light bg-light">
-    <div class="container-fluid">
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarTogglerDemo03"
-        aria-controls="navbarTogglerDemo03"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <a class="navbar-brand" href="#" @click="store.state.mindenekelott = 1">Sori-progi</a>
-      <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
-        <ul
-          class="navbar-nav me-auto mb-2 mb-lg-0"
-          data-bs-toggle="collapse"
-          data-bs-target=".navbar-collapse.show"
-        >
-          <li class="nav-item">
-            <a class="nav-link" @click="form_megjelenites" href="#"
-              >Hozzáadás</a
-            >
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" @click="store.state.mindenekelott = 2">Rejtettek</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" tabindex="-1">Beállítások</a>
-          </li>
-        </ul>
-        <!-- <div class="d-flex">
-        text
-      </div> -->
-      </div>
-    </div>
-  </nav>
-
   <div
     class="container shadow p-3"
     v-bind:class="{ 'd-none': store.state.form_nemlathato }"
@@ -110,7 +71,6 @@
             title="Útvonal:"
             placeholder="Útvonal:"
             v-model="store.state.sorozat_ut"
-            
           />
         </div>
       </div>
@@ -122,7 +82,6 @@
             title="Kép:"
             placeholder="Kép:"
             v-model="store.state.sorozat_kep"
-            
           />
         </div>
       </div>
@@ -150,13 +109,15 @@
               type="checkbox"
               id="flexSwitchCheckChecked"
             />
-            
           </div>
         </div>
       </div>
       <div class="d-flex justify-content-center">
-
-        <button type="submit" @click.prevent="sorzat_add" class="btn btn-primary">
+        <button
+          type="submit"
+          @click.prevent="sorzat_add"
+          class="btn btn-primary"
+        >
           <span> <i class="far fa-save"></i> Mentés </span>
         </button>
         <button class="btn btn-primary mx-2" @click.prevent="megsem">
@@ -183,7 +144,7 @@ import axios from "axios";
 export default {
   setup() {
     const store = inject("store");
- /* eslint-disable no-unused-vars */
+    /* eslint-disable no-unused-vars */
     const adatkereso = function () {
       // https://api.themoviedb.org/3/search/tv?api_key=yes&language=en-US&page=1&query=kifejezes&include_adult=false
       axios
@@ -195,11 +156,11 @@ export default {
         .then((response) => {
           console.log(response);
           const alap_keres = response.data.results[0];
-        store.state.sorozat_resz = -1;
-        store.state.sorozat_evadresz = 25;
-        store.state.sorozat_evad = 1;
-         store.state.sorozat_tvdb = alap_keres.id;
-         store.state.sorozat_kep =
+          store.state.sorozat_resz = -1;
+          store.state.sorozat_evadresz = 25;
+          store.state.sorozat_evad = 1;
+          store.state.sorozat_tvdb = alap_keres.id;
+          store.state.sorozat_kep =
             "https://image.tmdb.org/t/p/w300/" + alap_keres.poster_path;
         })
         .catch((error) => console.log(error));
@@ -236,12 +197,8 @@ export default {
 
       store.state.aktualis = "";
     };
-    const form_megjelenites = function () {
-      store.state.form_nemlathato = !store.state.form_nemlathato;
-      window.scrollTo(0, 0);
-      // /console.log(messages);
-    };
- const megsem = function() {
+   
+    const megsem = function () {
       store.state.sorozat_nev = "";
       store.state.sorozat_resz = "";
       store.state.sorozat_evad = "";
@@ -253,7 +210,7 @@ export default {
       store.state.form_nemlathato = true;
 
       store.state.aktualis = "";
- }
+    };
     const torlo = function () {
       db.database()
         .ref("data")
@@ -283,7 +240,6 @@ export default {
     return {
       sorzat_add,
       store,
-      form_megjelenites,
       torlo,
       megsem,
       adatkereso,
