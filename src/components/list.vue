@@ -61,7 +61,18 @@
                   >
                 </div>
                 <div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-outline-warning">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-warning"
+                    @click="
+                      sorozat_moviedb_aktualizalas(
+                        parseInt(message.evad),
+                        message.mas,
+                        message.id,
+                        parseInt(message.resz + 1)
+                      )
+                    "
+                  >
                     <i class="far fa-question-circle"></i>
                   </button>
                   <button
@@ -105,10 +116,18 @@ import axios from "axios";
 export default {
   setup() {
     const store = inject("store");
-
+    const firebase_beiras = function (obj, kulcs) {
+      db.database()
+        .ref("data/" + kulcs)
+        .update(obj, (error) => {
+          if (error) {
+            console.log("Hiba a növelés folyamatában");
+          }
+        });
+    };
     const novelo = function (kulcs, aktualis, urli, evad, id, evadperresz) {
       let objBe, frissS, frissE;
-      // aktualizacio(evad, id, kulcs, parseInt(aktualis + 2));
+      // sorozat_moviedb_aktualizalas(evad, id, kulcs, parseInt(aktualis + 2));
       if (evadperresz === aktualis + 1) {
         objBe = { Episode: 0, Season: evad + 1 };
         frissS = evad + 1;
@@ -118,44 +137,31 @@ export default {
         frissS = evad;
         frissE = aktualis + 2;
       }
-      aktualizacio(frissS, id, kulcs, frissE);
-
-      db.database()
-        .ref("data/" + kulcs)
-        .update(objBe, (error) => {
-          if (error) {
-            console.log("Hiba a növelés folyamatában");
-          } else {
-            // Data saved successfully!
-            // console.log(aktualis);
-          }
-        });
+      sorozat_moviedb_aktualizalas(frissS, id, kulcs, frissE);
+      firebase_beiras(objBe, kulcs);
 
       if (url_checker(urli) && store.state.beallitasok.megnyit) {
         webnezo(urli, evad, aktualis);
-
-        // window.open(urli, '_blank').focus();
       }
     };
     /* eslint-disable no-unused-vars */
 
-    const aktualizacio = function (evad, id, kulcs, resz) {
-      let novelt_resz = resz;
-      let one =
+    const sorozat_moviedb_aktualizalas = function (evad, id, kulcs, resz) {
+      let moviedb_alap =
         "https://api.themoviedb.org/3/tv/" +
         id +
-        "?api_key=1bdbd5a458166aa9a6bdb992815c0771&language=hu-HU&page=1&append_to_response=season";
-      let two =
+        "?api_key=1bdbd5a458166aa9a6bdb992815c0771&language=hu-HU&page=1";
+      let moviedb_resz =
         "https://api.themoviedb.org/3/tv/" +
         id +
         "/season/" +
         evad +
         "/episode/" +
-        novelt_resz +
+        resz +
         "?api_key=1bdbd5a458166aa9a6bdb992815c0771&language=hu-HU";
 
-      const requestOne = axios.get(one);
-      const requestTwo = axios.get(two);
+      const requestOne = axios.get(moviedb_alap);
+      const requestTwo = axios.get(moviedb_resz);
 
       axios
         .all([requestOne, requestTwo])
@@ -165,10 +171,7 @@ export default {
             const responseTwo = responses[1];
 
             const gyartasban = responseOne.data.in_production;
-            const lastepisode =
-              responseOne.data.last_episode_to_air.episode_number;
-            const lastseason =
-              responseOne.data.last_episode_to_air.season_number;
+
             const status = responseOne.data.status;
 
             //responseOne.data.next_episode_to_air
@@ -179,34 +182,40 @@ export default {
             })[0];
 
             const episode_count = alap_keres.episode_count;
-
-            const season_poster =
-              "https://image.tmdb.org/t/p/w300/" + alap_keres.poster_path;
-
-            const next_episodeAir = responseTwo.data.air_date;
+            // console.log(responseOne, "egy");
             // console.log(responseTwo);
-            db.database()
-              .ref("data/" + kulcs)
-              .update(
-                {
-                  Pic: season_poster,
-                  Episodeyear: episode_count,
-                  Next_episode: next_episodeAir,
-                  Status: status,
-                  Lastepisode: lastepisode,
-                  Lastseason: lastseason,
-                  Inproduction: gyartasban,
-                },
-                (error) => {
-                  if (error) {
-                    console.log("Hiba as folyamatában", kulcs, episode_count);
-                  }
-                }
-              );
+             let vege = (alap_keres.poster_path != null)
+                ? alap_keres.poster_path
+                : responseOne.data.poster_path;
+            const season_poster =
+              "https://image.tmdb.org/t/p/w300/" + vege;
+            const next_episodeAir = responseTwo.data.air_date;
+            // eslint-disable-next-line no-prototype-builtins
+            const lastepisode = Object.keys(responseOne.data).includes(
+              "last_episode_to_air"
+            )
+              ? responseOne.data.last_episode_to_air.episode_number
+              : " majd";
+            // eslint-disable-next-line no-prototype-builtins
+            const lastseason = Object.keys(responseOne.data).includes(
+              "last_episode_to_air"
+            )
+              ? responseOne.data.last_episode_to_air.season_number
+              : " majd";
+            let obj = {
+              Pic: season_poster,
+              Episodeyear: episode_count,
+              Next_episode: next_episodeAir,
+              Status: status,
+              Lastepisode: lastepisode,
+              Lastseason: lastseason,
+              Inproduction: gyartasban,
+            };
+            firebase_beiras(obj, kulcs);
           })
         )
         .catch((errors) => {
-          // react on errors.
+          console.log(errors);
         });
     };
     /* eslint-disable no-unused-vars */
@@ -227,43 +236,33 @@ export default {
       var linke, mino;
 
       if (extractHostname(url) == "netmozi.com") {
-        if (url.indexOf("//") > -1) {
-          linke =
-            url.split("/").slice(0, 6).join("/") + "/s" + evad + "/e" + resz;
-        }
+        linke =
+          url.split("/").slice(0, 6).join("/") + "/s" + evad + "/e" + resz;
       } //netmozi url kezelo
       else if (
         extractHostname(url) == "www.sorozatbarat.online" ||
         extractHostname(url) == "www.sorozatbarat.club"
       ) {
-        if (url.indexOf("//") > -1) {
-          if (evad > 9) {
-            if (resz > 9) {
-              mino = "#" + evad + "_evad_" + resz + "_resz";
-            } else {
-              mino = "#" + evad + "_evad_0" + resz + "_resz";
-            }
-            linke =
-              url.split("/").slice(0, 7).join("/") +
-              "/" +
-              evad +
-              "_evad" +
-              mino;
+        if (evad > 9) {
+          if (resz > 9) {
+            mino = "#" + evad + "_evad_" + resz + "_resz";
           } else {
-            if (resz > 9) {
-              mino = "#0" + evad + "_evad_" + resz + "_resz";
-            } else {
-              mino = "#0" + evad + "_evad_0" + resz + "_resz";
-            }
-            linke =
-              url.split("/").slice(0, 7).join("/") +
-              "/0" +
-              evad +
-              "_evad" +
-              mino;
+            mino = "#" + evad + "_evad_0" + resz + "_resz";
           }
+          linke =
+            url.split("/").slice(0, 7).join("/") + "/" + evad + "_evad" + mino;
+        } else {
+          if (resz > 9) {
+            mino = "#0" + evad + "_evad_" + resz + "_resz";
+          } else {
+            mino = "#0" + evad + "_evad_0" + resz + "_resz";
+          }
+          linke =
+            url.split("/").slice(0, 7).join("/") + "/0" + evad + "_evad" + mino;
         }
-      } //sorozatbarat url kezelo
+      } else {
+        linke = url;
+      } // url kezelo
 
       window.open(linke, "_blank");
     }
@@ -282,7 +281,6 @@ export default {
         store.state.data2[i].archiv == 2 ? false : true;
       store.state.sorozat_kep = store.state.data2[i].kep;
       store.state.aktualis = kulcs;
-      // console.log(store.state.data[0]);
     };
     const url_checker = function (str) {
       let regex =
@@ -299,8 +297,6 @@ export default {
         .ref("data")
         .on("value", (snapshot) => {
           const data = snapshot.val();
-          // let messages = [];
-          // let mutasd_melyiket = 1;
           store.state.data = [];
           Object.keys(data).forEach((key) => {
             if (data[key].Archive) {
@@ -320,13 +316,16 @@ export default {
                 nseas: data[key].Lastseason,
               });
             }
+            // localStorage.setItem('user', JSON.stringify(user));
+            // var user = JSON.parse(localStorage.getItem('user'));
+
+
           });
-          
         });
     };
 
     onMounted(() => {
-      betolto(store.state.mindenekelott);
+      betolto();
     });
 
     return {
@@ -334,6 +333,7 @@ export default {
       store,
       modosito,
       url_checker,
+      sorozat_moviedb_aktualizalas,
     };
   },
   computed: {
@@ -344,7 +344,6 @@ export default {
         .sort((a, b) => a.nev.localeCompare(b.nev));
 
       return this.store.state.data2;
-      // console.log( this.store.state.data, "kecske");
     },
   },
 };

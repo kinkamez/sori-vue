@@ -1,6 +1,6 @@
 <template>
   <div
-    class="container shadow p-3"
+    class="container shadow p-3 mt-5"
     v-bind:class="{ 'd-none': store.state.form_nemlathato }"
     id="hozzaadomezo"
   >
@@ -12,13 +12,13 @@
             class="form-control"
             type="text"
             v-model="store.state.sorozat_nev"
-            v-on:blur="adatkereso"
+            v-on:blur="sorozat_moviedbkereses"
             autofocus
             required
             placeholder="Sorozat:"
             style="text-transform: capitalize"
           />
-          <!-- <button @click.prevent="adatkereso">?</button> -->
+          <!-- <button @click.prevent="sorozat_moviedbkereses">?</button> -->
         </div>
       </div>
       <div class="row mb-2">
@@ -145,8 +145,7 @@ export default {
   setup() {
     const store = inject("store");
     /* eslint-disable no-unused-vars */
-    const adatkereso = function () {
-      // https://api.themoviedb.org/3/search/tv?api_key=yes&language=en-US&page=1&query=kifejezes&include_adult=false
+    const sorozat_moviedbkereses = function () {
       axios
         .get(
           "https://api.themoviedb.org/3/search/tv?api_key=1bdbd5a458166aa9a6bdb992815c0771&language=hu-HU&page=1&query= " +
@@ -154,14 +153,13 @@ export default {
             "&include_adult=false"
         )
         .then((response) => {
-          console.log(response);
           const alap_keres = response.data.results[0];
           store.state.sorozat_resz = -1;
           store.state.sorozat_evadresz = 25;
           store.state.sorozat_evad = 1;
           store.state.sorozat_tvdb = alap_keres.id;
           store.state.sorozat_kep =
-            "https://image.tmdb.org/t/p/w300/" + alap_keres.poster_path;
+            "https://image.tmdb.org/t/p/w300" + alap_keres.poster_path;
         })
         .catch((error) => console.log(error));
     };
@@ -185,19 +183,9 @@ export default {
         .ref("data/" + newPostKey)
         .update(beirandoobj);
 
-      store.state.sorozat_nev = "";
-      store.state.sorozat_resz = "";
-      store.state.sorozat_evad = "";
-      store.state.sorozat_kep = "";
-      store.state.sorozat_evadresz = "";
-      store.state.sorozat_ut = "";
-      store.state.sorozat_tvdb = "";
-      store.state.sorozat_megjelenites = false;
-      store.state.form_nemlathato = true;
-
-      store.state.aktualis = "";
+     megsem();
     };
-   
+
     const megsem = function () {
       store.state.sorozat_nev = "";
       store.state.sorozat_resz = "";
@@ -208,7 +196,6 @@ export default {
       store.state.sorozat_tvdb = "";
       store.state.sorozat_megjelenites = false;
       store.state.form_nemlathato = true;
-
       store.state.aktualis = "";
     };
     const torlo = function () {
@@ -223,26 +210,15 @@ export default {
         .catch(function (error) {
           console.log("Remove failed: " + error.message);
         });
-      // db.database().ref("data/" + store.state.aktualis).remove();
-      store.state.sorozat_nev = "";
-      store.state.sorozat_kep = "";
 
-      store.state.sorozat_resz = "";
-      store.state.sorozat_evad = "";
-      store.state.sorozat_evadresz = "";
-      store.state.sorozat_ut = "";
-      store.state.sorozat_tvdb = "";
-      store.state.sorozat_megjelenites = false;
-      store.state.form_nemlathato = true;
-
-      store.state.aktualis = "";
+      megsem();
     };
     return {
       sorzat_add,
       store,
       torlo,
       megsem,
-      adatkereso,
+      sorozat_moviedbkereses,
     };
   },
 };
