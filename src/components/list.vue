@@ -77,14 +77,21 @@
                   </button>
                   <button
                     type="button"
-                    class="btn btn-sm btn-outline-light"
+                    class="btn btn-sm btn-outline-warning"
+                    @click="fooldal(message.ut)"
+                  >
+                    <i class="fa fa-folder-open-o" aria-hidden="true"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-warning"
                     @click="modosito(index, message.id)"
                   >
                     <i class="far fa-edit"></i>
                   </button>
                   <button
                     type="button"
-                    class="btn btn-sm btn-outline-success"
+                    class="btn btn-sm btn-outline-warning"
                     @click="
                       novelo(
                         message.id,
@@ -109,9 +116,10 @@
 </template>
 
 <script>
-import { onMounted, inject } from "vue";
+import { onMounted, inject, onUpdated } from "vue";
 import db from "../db.js";
 import axios from "axios";
+import $ from "jquery";
 
 export default {
   setup() {
@@ -129,7 +137,7 @@ export default {
       let objBe, frissS, frissE;
       // sorozat_moviedb_aktualizalas(evad, id, kulcs, parseInt(aktualis + 2));
       if (evadperresz === aktualis + 1) {
-        objBe = { Episode: 0, Season: evad + 1 };
+        objBe = { Episode: 0, Season: evad + 1 , Next_episode: "frissités kell"};
         frissS = evad + 1;
         frissE = 1;
       } else {
@@ -145,7 +153,12 @@ export default {
       }
     };
     /* eslint-disable no-unused-vars */
-
+const fooldal = function(urli){
+if (url_checker(urli)) 
+{
+  window.open(urli, '_blank');
+      }
+}
     const sorozat_moviedb_aktualizalas = function (evad, id, kulcs, resz) {
       let moviedb_alap =
         "https://api.themoviedb.org/3/tv/" +
@@ -184,12 +197,12 @@ export default {
             const episode_count = alap_keres.episode_count;
             // console.log(responseOne, "egy");
             // console.log(responseTwo);
-             let vege = (alap_keres.poster_path != null)
+            let vege =
+              alap_keres.poster_path != null
                 ? alap_keres.poster_path
                 : responseOne.data.poster_path;
-            const season_poster =
-              "https://image.tmdb.org/t/p/w300/" + vege;
-            const next_episodeAir = responseTwo.data.air_date;
+            const season_poster = "https://image.tmdb.org/t/p/w300" + vege;
+            const next_episodeAir = responseTwo.data.air_date || "frissités kell";
             // eslint-disable-next-line no-prototype-builtins
             const lastepisode = Object.keys(responseOne.data).includes(
               "last_episode_to_air"
@@ -318,8 +331,6 @@ export default {
             }
             // localStorage.setItem('user', JSON.stringify(user));
             // var user = JSON.parse(localStorage.getItem('user'));
-
-
           });
         });
     };
@@ -327,13 +338,22 @@ export default {
     onMounted(() => {
       betolto();
     });
-
+    onUpdated(() => {
+      $(document).ready(function () {
+        // $("img").height($("img").width()*1.5);
+        
+        console.log($("img").height());
+       
+    });
+      });
+    
     return {
       novelo,
       store,
       modosito,
       url_checker,
       sorozat_moviedb_aktualizalas,
+      fooldal,
     };
   },
   computed: {
@@ -363,6 +383,34 @@ export default {
 .maximg {
   max-height: 280px;
   background-color: black;
+ 
+}
+
+/* xs */
+@media (min-width: 585px) {
+img {
+    
+    height: 177px;
+   
+}
+}
+/* sm */
+@media (min-width: 768px) {
+    img {
+        height: 180px;
+    }
+}
+/* md */
+@media (min-width: 992px) {
+    img {
+        height: 200px;
+    }
+}
+/* lg */
+@media (min-width: 1200px) {
+    img {
+        height: 270px;
+    }
 }
 </style>
       
