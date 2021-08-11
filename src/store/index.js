@@ -14,6 +14,7 @@ const state = reactive({
   sorozat_megjelenites: false,
   form_nemlathato: true,
   aktualis: "",
+  user: false,
   beallitasok:{
     megnyit: true,
   },

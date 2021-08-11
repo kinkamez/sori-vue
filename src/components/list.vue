@@ -125,6 +125,9 @@ export default {
   setup() {
     const store = inject("store");
     const firebase_beiras = function (obj, kulcs) {
+      if (!store.state.user) {
+        return;
+      }
       db.database()
         .ref("data/" + kulcs)
         .update(obj, (error) => {
@@ -137,7 +140,11 @@ export default {
       let objBe, frissS, frissE;
       // sorozat_moviedb_aktualizalas(evad, id, kulcs, parseInt(aktualis + 2));
       if (evadperresz === aktualis + 1) {
-        objBe = { Episode: 0, Season: evad + 1 , Next_episode: "frissités kell"};
+        objBe = {
+          Episode: 0,
+          Season: evad + 1,
+          Next_episode: "frissités kell",
+        };
         frissS = evad + 1;
         frissE = 1;
       } else {
@@ -153,12 +160,11 @@ export default {
       }
     };
     /* eslint-disable no-unused-vars */
-const fooldal = function(urli){
-if (url_checker(urli)) 
-{
-  window.open(urli, '_blank');
+    const fooldal = function (urli) {
+      if (url_checker(urli)) {
+        window.open(urli, "_blank");
       }
-}
+    };
     const sorozat_moviedb_aktualizalas = function (evad, id, kulcs, resz) {
       let moviedb_alap =
         "https://api.themoviedb.org/3/tv/" +
@@ -195,26 +201,27 @@ if (url_checker(urli))
             })[0];
 
             const episode_count = alap_keres.episode_count;
-            // console.log(responseOne, "egy");
+            console.log(responseOne);
             // console.log(responseTwo);
             let vege =
               alap_keres.poster_path != null
                 ? alap_keres.poster_path
                 : responseOne.data.poster_path;
             const season_poster = "https://image.tmdb.org/t/p/w300" + vege;
-            const next_episodeAir = responseTwo.data.air_date || "frissités kell";
+            const next_episodeAir =
+              responseTwo.data.air_date || "frissités kell";
             // eslint-disable-next-line no-prototype-builtins
-            const lastepisode = Object.keys(responseOne.data).includes(
-              "last_episode_to_air"
-            )
-              ? responseOne.data.last_episode_to_air.episode_number
-              : " majd";
+            const lastepisode =
+              Object.keys(responseOne.data).includes("last_episode_to_air") &&
+              responseOne.data.last_episode_to_air != null
+                ? responseOne.data.last_episode_to_air.episode_number
+                : " majd";
             // eslint-disable-next-line no-prototype-builtins
-            const lastseason = Object.keys(responseOne.data).includes(
-              "last_episode_to_air"
-            )
-              ? responseOne.data.last_episode_to_air.season_number
-              : " majd";
+            const lastseason =
+              Object.keys(responseOne.data).includes("last_episode_to_air") &&
+              responseOne.data.last_episode_to_air != null
+                ? responseOne.data.last_episode_to_air.season_number
+                : " majd";
             let obj = {
               Pic: season_poster,
               Episodeyear: episode_count,
@@ -341,19 +348,16 @@ if (url_checker(urli))
     onUpdated(() => {
       $(document).ready(function () {
         // $("img").height($("img").width()*1.5);
-        
+
         console.log($("img").height());
-       
-    });
       });
-    
+    });
+
     return {
       novelo,
       store,
       modosito,
       url_checker,
-      sorozat_moviedb_aktualizalas,
-      fooldal,
     };
   },
   computed: {
@@ -383,34 +387,31 @@ if (url_checker(urli))
 .maximg {
   max-height: 280px;
   background-color: black;
- 
 }
 
 /* xs */
 @media (min-width: 585px) {
-img {
-    
+  img {
     height: 177px;
-   
-}
+  }
 }
 /* sm */
 @media (min-width: 768px) {
-    img {
-        height: 180px;
-    }
+  img {
+    height: 180px;
+  }
 }
 /* md */
 @media (min-width: 992px) {
-    img {
-        height: 200px;
-    }
+  img {
+    height: 200px;
+  }
 }
 /* lg */
 @media (min-width: 1200px) {
-    img {
-        height: 270px;
-    }
+  img {
+    height: 270px;
+  }
 }
 </style>
       

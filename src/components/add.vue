@@ -164,6 +164,9 @@ export default {
         .catch((error) => console.log(error));
     };
     const sorzat_add = function () {
+      if (!store.state.user) {
+        return;
+      }
       let beirandoobj = {
         Name: store.state.sorozat_nev,
         Archive: parseInt(store.state.sorozat_megjelenites ? "1" : "2", 10),
@@ -183,7 +186,7 @@ export default {
         .ref("data/" + newPostKey)
         .update(beirandoobj);
 
-     megsem();
+      megsem();
     };
 
     const megsem = function () {
@@ -199,6 +202,9 @@ export default {
       store.state.aktualis = "";
     };
     const torlo = function () {
+      if (!store.state.user) {
+        return;
+      }
       db.database()
         .ref("data")
         .child(store.state.aktualis)
